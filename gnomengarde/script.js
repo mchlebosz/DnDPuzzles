@@ -244,8 +244,186 @@ function isPathClear(startHex, endHex) {
 		}
 	}
 
+	// Additional check for diagonal movement through gaps between adjacent circles
+	if (isDiagonalMovementThroughGap(startHex, endHex)) {
+		console.log("Movement would cut through a diagonal gap between circles");
+		return false;
+	}
+
 	// If no intermediate hexagons are occupied, the path is clear
 	return true;
+}
+
+// Function to check if movement is trying to pass diagonally through a gap between circles
+function isDiagonalMovementThroughGap(startHex, endHex) {
+	// Get all pairs of adjacent occupied hexes
+	const occupiedArray = Array.from(occupiedHexes).map((pos) => {
+		const [x, y] = pos.split(",").map(Number);
+		return { x, y };
+	});
+
+	for (let i = 0; i < occupiedArray.length; i++) {
+		for (let j = i + 1; j < occupiedArray.length; j++) {
+			const hex1 = occupiedArray[i];
+			const hex2 = occupiedArray[j];
+
+			// Check if these two hexes are adjacent
+			if (areHexesAdjacent(hex1, hex2)) {
+				// Check if movement passes between these two hexes
+				if (doesMovementPassBetween(startHex, endHex, hex1, hex2)) {
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+// Check if two hexagons are adjacent to each other
+function areHexesAdjacent(hex1, hex2) {
+	// Calculate the distance between the two hexes
+	const dx = Math.abs(hex1.x - hex2.x);
+	const dy = Math.abs(hex1.y - hex2.y);
+
+	// Calculate the specific distances for adjacent hexes
+	const horizontalDistance = hexRadius * 1.5;
+	const verticalDistance = hexRadius * Math.sqrt(3);
+	const diagonalDistance = Math.sqrt(Math.pow(hexRadius * 0.75, 2) + Math.pow((hexRadius * Math.sqrt(3)) / 2, 2));
+
+	// Check if the hexes are adjacent based on precise distance calculations
+	// Allow for small rounding errors with a tolerance
+	const tolerance = 0.5;
+
+	// Check horizontal adjacency (left/right)
+	if (Math.abs(dx - horizontalDistance) < tolerance && dy < tolerance) {
+		return true;
+	}
+
+	// Check vertical adjacency for odd/even columns
+	if (dx < tolerance && Math.abs(dy - verticalDistance) < tolerance) {
+		return true;
+	}
+
+	// Check diagonal adjacency
+	if (Math.abs(dx - hexRadius * 0.75) < tolerance && Math.abs(dy - (hexRadius * Math.sqrt(3)) / 2) < tolerance) {
+		return true;
+	}
+
+	// Calculate the actual distance between hexes
+	const distance = Math.sqrt(Math.pow(hex1.x - hex2.x, 2) + Math.pow(hex1.y - hex2.y, 2));
+
+	// If the distance is approximately equal to the distance between adjacent hexes, they're adjacent
+	if (Math.abs(distance - horizontalDistance) < tolerance || Math.abs(distance - verticalDistance) < tolerance || Math.abs(distance - diagonalDistance) < tolerance) {
+		return true;
+	}
+
+	return false;
+}
+
+// Check if a movement passes between two occupied hexes
+function doesMovementPassBetween(startHex, endHex, hex1, hex2) {
+	// Calculate vectors
+	const moveVec = { x: endHex.x - startHex.x, y: endHex.y - startHex.y };
+	const hexGapVec = { x: hex2.x - hex1.x, y: hex2.y - hex1.y };
+
+	// Calculate the midpoint between the two hexes
+	const midpoint = { x: (hex1.x + hex2.x) / 2, y: (hex1.y + hex2.y) / 2 };
+
+	// Check if the movement line passes close to the midpoint
+	const distanceToLine = distancePointToLine(midpoint, startHex, endHex);
+	const hexDistance = Math.sqrt(hexGapVec.x * hexGapVec.x + hexGapVec.y * hexGapVec.y);
+
+	// Calculate the movement length
+	const movementLength = Math.sqrt(moveVec.x * moveVec.x + moveVec.y * moveVec.y);
+
+	// Check if the movement is long enough to potentially cut through
+	if (movementLength < hexRadius) {
+		return false; // Movement is too short to cut through
+	}
+
+	// Calculate if the movement direction is roughly perpendicular to the gap direction
+	const dotProduct = moveVec.x * hexGapVec.x + moveVec.y * hexGapVec.y;
+	const moveMagnitude = Math.sqrt(moveVec.x * moveVec.x + moveVec.y * moveVec.y);
+	const gapMagnitude = Math.sqrt(hexGapVec.x * hexGapVec.x + hexGapVec.y * hexGapVec.y);
+	const cosAngle = Math.abs(dotProduct) / (moveMagnitude * gapMagnitude);
+
+	// If movement is more perpendicular to the gap, it's more likely to be cutting through
+	const perpendicularThreshold = 0.7; // cos(45°) ≈ 0.7
+
+	// Lower threshold for distance when the movement direction is perpendicular to gap
+	const distanceThreshold = cosAngle < perpendicularThreshold ? hexRadius * 0.75 : hexRadius * 0.5;
+
+	// If the movement passes close to the midpoint between adjacent hexes, block it
+	if (distanceToLine < distanceThreshold && hexDistance < hexRadius * 2.5) {
+		// Additional check: Is the midpoint actually between start and end?
+		if (isPointBetween(midpoint, startHex, endHex, hexRadius)) {
+			console.log("Movement would cut through gap at midpoint:", midpoint);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Check if a point is roughly between two other points
+function isPointBetween(point, lineStart, lineEnd, tolerance) {
+	// Vector from start to end
+	const vec1 = {
+		x: lineEnd.x - lineStart.x,
+		y: lineEnd.y - lineStart.y,
+	};
+
+	// Vector from start to point
+	const vec2 = {
+		x: point.x - lineStart.x,
+		y: point.y - lineStart.y,
+	};
+
+	// If point is beyond the line segment, dot product will be negative or greater than the squared length
+	const dotProduct = vec1.x * vec2.x + vec1.y * vec2.y;
+	const squaredLength = vec1.x * vec1.x + vec1.y * vec1.y;
+
+	// Check with a tolerance to account for floating point errors
+	if (dotProduct < -tolerance || dotProduct > squaredLength + tolerance) {
+		return false;
+	}
+
+	return true;
+}
+
+// Calculate the distance from a point to a line defined by two points
+function distancePointToLine(point, lineStart, lineEnd) {
+	const lineLength = Math.sqrt(Math.pow(lineEnd.x - lineStart.x, 2) + Math.pow(lineEnd.y - lineStart.y, 2));
+
+	if (lineLength === 0) return Math.sqrt(Math.pow(point.x - lineStart.x, 2) + Math.pow(point.y - lineStart.y, 2));
+
+	const t = Math.max(0, Math.min(1, ((point.x - lineStart.x) * (lineEnd.x - lineStart.x) + (point.y - lineStart.y) * (lineEnd.y - lineStart.y)) / (lineLength * lineLength)));
+
+	const projectionX = lineStart.x + t * (lineEnd.x - lineStart.x);
+	const projectionY = lineStart.y + t * (lineEnd.y - lineStart.y);
+
+	return Math.sqrt(Math.pow(point.x - projectionX, 2) + Math.pow(point.y - projectionY, 2));
+}
+
+// Funkcja zwracająca sąsiadujące heksagony
+function getHexNeighbors(hex) {
+	const directions = [
+		{ dx: hexRadius * 1.5, dy: 0 }, // Right
+		{ dx: -hexRadius * 1.5, dy: 0 }, // Left
+		{ dx: hexRadius * 0.75, dy: (hexRadius * Math.sqrt(3)) / 2 }, // Bottom-right
+		{ dx: -hexRadius * 0.75, dy: (hexRadius * Math.sqrt(3)) / 2 }, // Bottom-left
+		{ dx: hexRadius * 0.75, dy: (-hexRadius * Math.sqrt(3)) / 2 }, // Top-right
+		{ dx: -hexRadius * 0.75, dy: (-hexRadius * Math.sqrt(3)) / 2 }, // Top-left
+	];
+
+	const neighbors = directions.map((dir) => ({
+		x: hex.x + dir.dx,
+		y: hex.y + dir.dy,
+	}));
+
+	console.log("Neighbors for hex:", hex, "are:", neighbors);
+	return neighbors;
 }
 
 // Funkcja sprawdzająca, czy heksagon jest osiągalny z krawędzi
@@ -280,26 +458,6 @@ function isReachableFromEdge(targetHex) {
 
 	// If no path to the edge is found, the target is enclosed
 	return false;
-}
-
-// Funkcja zwracająca sąsiadujące heksagony
-function getHexNeighbors(hex) {
-	const directions = [
-		{ dx: hexRadius * 1.5, dy: 0 }, // Right
-		{ dx: -hexRadius * 1.5, dy: 0 }, // Left
-		{ dx: hexRadius * 0.75, dy: (hexRadius * Math.sqrt(3)) / 2 }, // Bottom-right
-		{ dx: -hexRadius * 0.75, dy: (hexRadius * Math.sqrt(3)) / 2 }, // Bottom-left
-		{ dx: hexRadius * 0.75, dy: (-hexRadius * Math.sqrt(3)) / 2 }, // Top-right
-		{ dx: -hexRadius * 0.75, dy: (-hexRadius * Math.sqrt(3)) / 2 }, // Top-left
-	];
-
-	const neighbors = directions.map((dir) => ({
-		x: hex.x + dir.dx,
-		y: hex.y + dir.dy,
-	}));
-
-	console.log("Neighbors for hex:", hex, "are:", neighbors);
-	return neighbors;
 }
 
 // Rysowanie siatki i generowanie kółek
