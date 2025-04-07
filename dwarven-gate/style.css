@@ -1,0 +1,140 @@
+ @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+ @font-face {
+  font-family: dwarven;
+  src: url(font/Khuzdulerebor-Rjno.ttf) format('truetype');
+  font-weight: normal;
+}
+
+html
+{
+    background-color: #3b2e14;
+}
+body {
+    font-family: dwarven,'MedievalSharp', cursive;
+    color: #f0e6d2;
+    text-align: center;
+    padding: 20px;
+}
+
+button{
+    font-family: dwarven,'MedievalSharp', cursive;
+    color: #f0e6d2;
+    text-align: center;
+    padding: 20px;
+}
+
+body div#background-image{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.3;
+    background: #1a1a1a url('https://www.manytextures.com/wallpaper/18/1440/900/stone-wall-wallpaper.jpg');
+
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #c2b280;
+    text-shadow: 2px 2px #000;
+
+}
+
+p {
+    color: #d3c6a3;
+    margin-bottom: 20px;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 6px;
+    margin: 0 auto 20px auto;
+    width: max-content;
+    background: #3a3a3a;
+    border: 6px solid #5a4c32;
+    box-shadow: inset 0 0 15px #000;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background: #2f2f2f;
+    border: 2px solid #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: inset 0 0 8px #111;
+}
+
+.tile {
+    width: 80px;
+    height: 80px;
+    background: #5c3b1e;
+    color: #f0e6d2;
+    font-size: 30px;
+    border-radius: 10px;
+    border: 2px solid #deb887;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+    box-shadow: 2px 2px 6px #000;
+}
+
+#tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+    height: 200px;
+    padding: 10px;
+    background: rgba(40, 30, 20, 0.3);
+    border: 2px solid #5a4c32;
+    border-radius: 10px;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px 20px;
+    background: #3b2e14;
+    color: #f0e6d2;
+    border: 2px solid #c2b280;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 2px 6px #000;
+}
+
+button#submit-button{
+    background: #5c3b1e;
+    color: #f0e6d2;
+    border: 2px solid #deb887;
+    font-size: 20px;
+    padding: 12px 24px;
+}
+
+button:hover {
+    background: #4d3a1a;
+}
+
+#result {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #f3e8c4;
+    font-size: 1.2em;
+    text-shadow: 1px 1px #000;
+}
+
+#numeral {
+    position: relative;
+}
