@@ -70,7 +70,7 @@ function isValidMove(startHex, endHex) {
 	const distance = Math.hypot(dx, dy);
 	if (distance < hexRadius * 0.8) return true;
 
-	// Check for obstacles along path
+	// Check for occupied hexes along path
 	const steps = Math.max(Math.abs(dx / (hexRadius * 1.5)), Math.abs(dy / (hexRadius * Math.sqrt(3))));
 
 	for (let i = 1; i < steps; i++) {
@@ -85,81 +85,80 @@ function isValidMove(startHex, endHex) {
 		}
 	}
 
-	// Check if movement passes between adjacent circles
-	return !passesThrough(startHex, endHex);
+	// Check if there are tight spaces between circles that would block movement
+	return !wouldPassThroughTightSpace(startHex, endHex);
 }
 
-// Check if movement passes between adjacent circles
-function passesThrough(startHex, endHex) {
-	const occupiedArr = Array.from(occupiedHexes).map((pos) => {
-		const [x, y] = pos.split(",").map(Number);
-		return { x, y };
-	});
+// Check if the path passes through a tight space between circles
+function wouldPassThroughTightSpace(start, end) {
+	// Convert string positions to objects with x, y coordinates
+	const occupiedPositions = Array.from(occupiedHexes)
+		.map((pos) => {
+			const [x, y] = pos.split(",").map(Number);
+			return { x, y };
+		})
+		.filter((pos) => {
+			// Filter out the start position itself
+			return pos.x !== start.x || pos.y !== start.y;
+		});
 
-	const moveVec = {
-		x: endHex.x - startHex.x,
-		y: endHex.y - startHex.y,
+	// Line segment parameters
+	const lineVec = {
+		x: end.x - start.x,
+		y: end.y - start.y,
 	};
+	const lineLength = Math.hypot(lineVec.x, lineVec.y);
 
-	// Quick exit for short movements
-	const moveLen = Math.hypot(moveVec.x, moveVec.y);
-	if (moveLen < hexRadius) return false;
+	// Unit direction vector
+	const dirX = lineVec.x / lineLength;
+	const dirY = lineVec.y / lineLength;
 
-	// Check all pairs of occupied hexes
-	for (let i = 0; i < occupiedArr.length; i++) {
-		for (let j = i + 1; j < occupiedArr.length; j++) {
-			const hex1 = occupiedArr[i];
-			const hex2 = occupiedArr[j];
+	// Check each pair of occupied positions
+	for (let i = 0; i < occupiedPositions.length; i++) {
+		for (let j = i + 1; j < occupiedPositions.length; j++) {
+			const pos1 = occupiedPositions[i];
+			const pos2 = occupiedPositions[j];
 
-			// Calculate distance between hexes
-			const hexDist = Math.hypot(hex2.x - hex1.x, hex2.y - hex1.y);
+			// Calculate distance between these two positions
+			const distBetween = Math.hypot(pos2.x - pos1.x, pos2.y - pos1.y);
 
-			// Skip if not potential blocking pair
-			if (hexDist <= hexRadius * 1.1 || hexDist >= hexRadius * 2.2) continue;
+			// Skip if they're too far apart to form a "squeeze"
+			// or if they're essentially at the same position (shouldn't happen)
+			if (distBetween > radius * 4 || distBetween < radius * 0.5) continue;
 
-			// Calculate midpoint between hexes
-			const mid = {
-				x: (hex1.x + hex2.x) / 2,
-				y: (hex1.y + hex2.y) / 2,
+			// Calculate the midpoint between the two positions
+			const midpoint = {
+				x: (pos1.x + pos2.x) / 2,
+				y: (pos1.y + pos2.y) / 2,
 			};
 
-			// Distance from midpoint to movement path
-			const distToPath = pointToLineDistance(mid, startHex, endHex);
-
-			// Gap vector between hexes
-			const gapVec = {
-				x: hex2.x - hex1.x,
-				y: hex2.y - hex1.y,
+			// Calculate distance from midpoint to line
+			// Formula for point-to-line distance: |cross(line_direction, point - line_start)| / |line_direction|
+			const vecToMid = {
+				x: midpoint.x - start.x,
+				y: midpoint.y - start.y,
 			};
 
-			// Check if path passes between hexes
-			const dot = moveVec.x * gapVec.x + moveVec.y * gapVec.y;
-			const cosAngle = dot / (moveLen * hexDist);
+			// Cross product magnitude
+			const crossProduct = Math.abs(dirX * vecToMid.y - dirY * vecToMid.x);
 
-			// Check if path passes between hexes
-			if (distToPath < hexRadius * 0.7 && Math.abs(cosAngle) > 0.3) {
-				return true;
+			// This is the perpendicular distance from midpoint to line
+			const distToLine = crossProduct;
+
+			// Check if midpoint is near the line segment (not just the infinite line)
+			// Dot product determines if the midpoint's projection falls on the line segment
+			const dotProduct = dirX * vecToMid.x + dirY * vecToMid.y;
+			const isNearLineSegment = dotProduct >= 0 && dotProduct <= lineLength;
+
+			// If midpoint is near the line and the gap is too small
+			// Allow for slight clearance - if gap is less than 2.2*radius (slightly more than diameter)
+			if (isNearLineSegment && distToLine < radius * 1.1 && distBetween < radius * 2.2) {
+				return true; // Path is blocked
 			}
 		}
 	}
 
-	return false;
-}
-
-// Calculate distance from point to line segment
-function pointToLineDistance(point, lineStart, lineEnd) {
-	const lineVecX = lineEnd.x - lineStart.x;
-	const lineVecY = lineEnd.y - lineStart.y;
-	const lineLen = Math.hypot(lineVecX, lineVecY);
-
-	if (lineLen === 0) return Math.hypot(point.x - lineStart.x, point.y - lineStart.y);
-
-	const t = Math.max(0, Math.min(1, ((point.x - lineStart.x) * lineVecX + (point.y - lineStart.y) * lineVecY) / (lineLen * lineLen)));
-
-	const projX = lineStart.x + t * lineVecX;
-	const projY = lineStart.y + t * lineVecY;
-
-	return Math.hypot(point.x - projX, point.y - projY);
+	return false; // No tight spaces found
 }
 
 // Create draggable circle
@@ -221,10 +220,10 @@ function createCircle(x, y) {
 			line.setAttribute("y2", currentY);
 
 			if (targetHex.x !== currentHex.x || targetHex.y !== currentHex.y) {
-				if (isValidMove(currentHex, targetHex)) {
-					// Remove current position from occupied hexes
-					occupiedHexes.delete(`${currentHex.x},${currentHex.y}`);
+				// Before moving, remove this circle from occupiedHexes temporarily
+				occupiedHexes.delete(`${currentHex.x},${currentHex.y}`);
 
+				if (isValidMove(currentHex, targetHex)) {
 					// Move circle and update occupied hexes
 					circle.style.left = `${targetHex.x - radius}px`;
 					circle.style.top = `${targetHex.y - radius}px`;
@@ -233,6 +232,9 @@ function createCircle(x, y) {
 					// After moving the circle, update line endpoint to new circle position
 					line.setAttribute("x2", targetHex.x);
 					line.setAttribute("y2", targetHex.y);
+				} else {
+					// If move is invalid, add the current position back to occupiedHexes
+					occupiedHexes.add(`${currentHex.x},${currentHex.y}`);
 				}
 			}
 		}

@@ -38,3 +38,15 @@ body {
     cursor: pointer;
     touch-action: none;
 }
+
+/* Movement arrow animation */
+.movement-arrow {
+    stroke: #4CAF50;
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; }
+}
