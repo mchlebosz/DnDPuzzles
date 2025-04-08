@@ -14,6 +14,14 @@
     <p></p>
     <p>Align the runes so each line totals 15 to open the ancient dwarven gate</p>
 
+    <div id="font-toggle-container">
+        <label class="switch">
+            <input type="checkbox" id="font-toggle">
+            <span class="slider"></span>
+        </label>
+        <span id="toggle-label">Dwarven Font</span>
+    </div>
+
     <div id="grid">
         <div class="cell" data-index="0"></div>
         <div class="cell" data-index="1"></div>
@@ -28,7 +36,11 @@
 
     <div id="tiles"></div>
 
-    <button onclick="checkSolution()">Open</button>
+    <!-- Replace the button with this -->
+    <div id="lever-container">
+        <div id="lever-base"></div>
+        <div id="lever-handle"></div>
+    </div>
     <div id="result"></div>
 
     <footer>

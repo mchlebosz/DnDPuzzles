@@ -138,3 +138,142 @@ button:hover {
 #numeral {
     position: relative;
 }
+
+/* Add to style.css */
+#font-toggle-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+#toggle-label {
+    color: #f0e6d2;
+    text-shadow: 1px 1px #000;
+    font-size: 0.9em;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #5c3b1e;
+    border: 2px solid #deb887;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 2px;
+    background-color: #f0e6d2;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #3b2e14;
+    border-color: #c2b280;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Add a class for MedievalSharp font */
+.body-medievalsharp {
+    font-family: 'MedievalSharp', cursive;
+}
+
+/* Replace the button styles with these lever styles */
+#lever-container {
+    position: relative;
+    width: 100px;
+    height: 180px;
+    margin: 30px auto;
+    cursor: pointer;
+}
+
+#lever-base {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to bottom, #5a4c32, #3b2e14);
+    border-radius: 10px;
+    border: 3px solid #c2b280;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+#lever-handle {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-20deg);
+    width: 20px;
+    height: 120px;
+    background: linear-gradient(to right, #7a6b48, #5a4c32, #7a6b48);
+    border-radius: 10px;
+    border: 3px solid #c2b280;
+    transform-origin: bottom center;
+    transition: transform 0.3s ease;
+    z-index: 2;
+}
+
+#lever-handle:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 20px;
+    background: #c2b280;
+    border-radius: 50%;
+}
+
+#lever-label {
+    position: absolute;
+    bottom: -30px;
+    width: 100%;
+    text-align: center;
+    color: #f0e6d2;
+    font-size: 1em;
+    text-shadow: 1px 1px 2px #000;
+}
+
+#lever-container:hover #lever-handle {
+    transform: translateX(-50%) rotate(-15deg);
+}
+
+#lever-container:active #lever-handle {
+    transform: translateX(-50%) rotate(10deg);
+}
+
+/* Remove old button styles */
+button {
+    display: none;
+}

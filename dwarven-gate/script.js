@@ -107,3 +107,41 @@ function checkSolution() {
 		result.style.color = "crimson";
 	}
 }
+
+// Replace the event listener for the button with this lever interaction
+const leverContainer = document.getElementById("lever-container");
+
+leverContainer.addEventListener("click", function () {
+	// Animate the lever pull
+	const lever = document.getElementById("lever-handle");
+	lever.style.transform = "translateX(-50%) rotate(20deg)";
+
+	// After a short delay, check the solution
+	setTimeout(() => {
+		checkSolution();
+		// Reset lever position after checking
+		setTimeout(() => {
+			lever.style.transform = "translateX(-50%) rotate(-20deg)";
+		}, 1000);
+	}, 300);
+});
+
+// Remove the old button from the HTML if it exists
+const oldButton = document.querySelector("button");
+if (oldButton) {
+	oldButton.remove();
+}
+
+// Add to the beginning of script.js
+const fontToggle = document.getElementById("font-toggle");
+const toggleLabel = document.getElementById("toggle-label");
+
+fontToggle.addEventListener("change", function () {
+	if (this.checked) {
+		document.body.classList.add("body-medievalsharp");
+		toggleLabel.textContent = "Medieval Font";
+	} else {
+		document.body.classList.remove("body-medievalsharp");
+		toggleLabel.textContent = "Dwarven Font";
+	}
+});
