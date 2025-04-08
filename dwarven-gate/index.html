@@ -4,13 +4,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dwarven Temple Puzzle</title>
+    <title>Kamienna Brama Krasnoludow</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="../favicon.svg" sizes="any" type="image/svg+xml">
 
 </head>
 
 <body>
+
+    <div id="audio-elements" style="display: none;">
+        <audio id="switch-sound" src="sounds/switch.mp3" preload="auto"></audio>
+        <audio id="falling-sound" src="sounds/falling.mp3" preload="auto"></audio>
+        <audio id="open-sound" src="sounds/open.mp3" preload="auto"></audio>
+    </div>
+
+
     <div id="background-image"></div>
     <h1>Kamienna Brama</h1>
     <p></p>
@@ -45,6 +53,7 @@
     <div id="result"></div>
 
     <footer>
+        <script src="SoundManager.js"></script>
         <script src="script.js"></script>
     </footer>
 

@@ -1,15 +1,12 @@
 const tilesContainer = document.getElementById("tiles");
 const grid = document.getElementById("grid");
 const cells = Array.from(document.querySelectorAll(".cell"));
-const result = document.getElementById("result");
 
 for (let i = 1; i <= 9; i++) {
 	const tile = document.createElement("div");
 	tile.className = "tile";
 	tile.textContent = i;
 	tile.dataset.value = i;
-	tile.style.left = `${Math.random() * 200}px`;
-	tile.style.top = `${Math.random() * 100}px`;
 	tilesContainer.appendChild(tile);
 }
 
@@ -71,17 +68,14 @@ function onPointerUp(ev) {
 }
 
 function checkSolution() {
+	console.log("Checking solution2...");
 	const gridValues = cells.map((cell) => {
 		const child = cell.firstChild;
 		return child ? parseInt(child.dataset.value) : 0;
 	});
 
 	const isComplete = gridValues.every((v) => v !== 0);
-	if (!isComplete) {
-		result.textContent = "The ancient runes are incomplete...";
-		result.style.color = "orange";
-		return;
-	}
+	console.log("Solution is complete:", isComplete);
 
 	const lines = [
 		[0, 1, 2],
@@ -98,30 +92,87 @@ function checkSolution() {
 		const sum = indices.reduce((acc, i) => acc + gridValues[i], 0);
 		return sum === 15;
 	});
+	console.log("Solution is valid:", isValid);
 
 	if (isValid) {
-		result.textContent = "\u26CF\uFE0F Brama dudni... Otwiera sie!";
-		result.style.color = "lightgreen";
+		// Play the open sound
+		soundManager.play("open");
+		// Fade out the whole screen on success
+		document.body.classList.add("fade-out");
+		// Disable further interactions
+		leverContainer.style.pointerEvents = "none";
+		tilesContainer.style.pointerEvents = "none";
 	} else {
-		result.textContent = "\u274C Runy nie sa wyrownane. Sprobuj ponownie.";
-		result.style.color = "crimson";
+		// Shake screen on wrong answer
+		document.body.classList.add("shake-screen");
+		// Reset tiles on wrong answer
+		resetTiles();
+		// Remove shake class after animation completes
+		setTimeout(() => {
+			document.body.classList.remove("shake-screen");
+		}, 1000);
 	}
+}
+
+// Add this new function to reset tiles
+function resetTiles() {
+	console.log("Resetting tiles...");
+	const tiles = document.querySelectorAll(".tile");
+
+	// Add a fade-out effect to tiles in cells
+	cells.forEach((cell) => {
+		if (cell.firstChild) {
+			cell.firstChild.style.transition = "opacity 0.3s";
+			cell.firstChild.style.opacity = "0";
+		}
+	});
+
+	soundManager.play("falling");
+
+	// Wait for fade-out before moving tiles
+	setTimeout(() => {
+		cells.forEach((cell) => {
+			if (cell.firstChild) {
+				tilesContainer.appendChild(cell.firstChild);
+			}
+		});
+
+		tiles.forEach((tile) => {
+			tile.style.position = "static";
+			tile.style.transition = "opacity 0.3s, left 0.5s, top 0.5s";
+			tile.style.opacity = "1";
+		});
+	}, 300);
+
+	// Remove the fade-out effect after a short delay
+	setTimeout(() => {
+		tiles.forEach((tile) => {
+			tile.style.transition = "none";
+			tile.style.opacity = "1";
+		});
+	}, 600);
 }
 
 // Replace the event listener for the button with this lever interaction
 const leverContainer = document.getElementById("lever-container");
 
+// Update the lever interaction in script.js
 leverContainer.addEventListener("click", function () {
+	console.log("Lever clicked");
 	// Animate the lever pull
 	const lever = document.getElementById("lever-handle");
-	lever.style.transform = "translateX(-50%) rotate(20deg)";
+	lever.style.transform = "translateX(-50%) rotate(10deg)";
+
+	soundManager.play("switch");
 
 	// After a short delay, check the solution
 	setTimeout(() => {
+		console.log("Checking solution...");
 		checkSolution();
 		// Reset lever position after checking
 		setTimeout(() => {
 			lever.style.transform = "translateX(-50%) rotate(-20deg)";
+			soundManager.play("switch");
 		}, 1000);
 	}, 300);
 });
