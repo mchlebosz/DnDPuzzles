@@ -43,6 +43,9 @@ class DraggableCircle {
 		if (this.isStatic) return;
 		event.preventDefault();
 
+		// Clear any existing position markers
+		this.clearPositionMarkers();
+
 		const originalX = parseInt(this.element.style.left) + this.radius;
 		const originalY = parseInt(this.element.style.top) + this.radius;
 		const originalHex = this.grid.findClosestHex(originalX, originalY);
@@ -56,16 +59,69 @@ class DraggableCircle {
 		let lastHexKey = startHexKey;
 		let isValidDrop = false;
 
+		// Replace the createLine function with this:
 		const createLine = () => {
 			const svg = document.querySelector(".grid-overlay");
-			line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-			line.setAttribute("stroke", "#3498db");
-			line.setAttribute("stroke-width", 2);
-			line.setAttribute("x1", originalX);
-			line.setAttribute("y1", originalY);
-			line.setAttribute("x2", originalX);
-			line.setAttribute("y2", originalY);
+
+			// Remove any existing lines first
+			const existingLines = svg.querySelectorAll(".drag-line");
+			existingLines.forEach((line) => line.remove());
+
+			// Create new line
+			line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+			line.setAttribute("class", "drag-line"); // Changed from generic 'line'
+
+			// Create gradient if it doesn't exist
+			if (!document.querySelector("#magicGradient")) {
+				const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+				const gradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+				gradient.setAttribute("id", "magicGradient");
+				gradient.setAttribute("x1", "0%");
+				gradient.setAttribute("y1", "0%");
+				gradient.setAttribute("x2", "100%");
+				gradient.setAttribute("y2", "100%");
+
+				const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+				stop1.setAttribute("offset", "0%");
+				stop1.setAttribute("stop-color", "#d4af37");
+
+				const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+				stop2.setAttribute("offset", "100%");
+				stop2.setAttribute("stop-color", "#f0e68c");
+
+				gradient.appendChild(stop1);
+				gradient.appendChild(stop2);
+				defs.appendChild(gradient);
+				svg.appendChild(defs);
+			}
+
+			line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+			line.setAttribute("stroke", "url(#magicGradient)");
+			line.setAttribute("stroke-width", 4);
+			line.setAttribute("fill", "none");
+			line.setAttribute("stroke-dasharray", "10,5");
+			line.setAttribute("filter", "url(#glow)");
 			svg.appendChild(line);
+
+			// Add pulsing circle at origin
+			const originCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+			originCircle.setAttribute("cx", originalX);
+			originCircle.setAttribute("cy", originalY);
+			originCircle.setAttribute("r", 8);
+			originCircle.setAttribute("fill", "url(#magicGradient)");
+			originCircle.setAttribute("class", "origin-pulse");
+			svg.appendChild(originCircle);
+
+			// Animation for origin circle
+			const pulseInterval = setInterval(() => {
+				const currentR = parseInt(originCircle.getAttribute("r"));
+				originCircle.setAttribute("r", currentR === 8 ? 10 : 8);
+			}, 500);
+
+			return () => {
+				clearInterval(pulseInterval);
+				originCircle.remove();
+			};
 		};
 
 		const moveCircle = (moveEvent) => {
@@ -112,7 +168,17 @@ class DraggableCircle {
 		};
 
 		const stopDrag = () => {
-			if (line) line.remove();
+			// Remove the drag line immediately
+			if (line) {
+				line.remove();
+				line = null;
+			}
+
+			// Remove any remaining sparkles or effects
+			const svg = document.querySelector(".grid-overlay");
+			const effects = svg.querySelectorAll(".sparkle-group, .origin-pulse");
+			effects.forEach((effect) => effect.remove());
+
 			document.removeEventListener("mousemove", moveCircle);
 			document.removeEventListener("mouseup", stopDrag);
 			document.removeEventListener("touchmove", moveCircle);
@@ -161,6 +227,12 @@ class DraggableCircle {
 		document.addEventListener("mouseup", stopDrag);
 		document.addEventListener("touchmove", moveCircle, { passive: false });
 		document.addEventListener("touchend", stopDrag);
+	}
+
+	clearPositionMarkers() {
+		const svg = document.querySelector(".grid-overlay");
+		const markers = svg.querySelectorAll(".position-marker");
+		markers.forEach((marker) => marker.remove());
 	}
 
 	countAdjacentCircles(hex) {
@@ -216,36 +288,105 @@ class DraggableCircle {
 
 	showMovementFeedback(fromHex, toHex) {
 		const svg = document.querySelector(".grid-overlay");
-		const arrow = document.createElementNS("http://www.w3.org/2000/svg", "line");
-		arrow.setAttribute("stroke", "#4CAF50");
-		arrow.setAttribute("stroke-width", 2);
-		arrow.setAttribute("stroke-dasharray", "5,5");
-		arrow.setAttribute("x1", fromHex.x);
-		arrow.setAttribute("y1", fromHex.y);
-		arrow.setAttribute("x2", toHex.x);
-		arrow.setAttribute("y2", toHex.y);
+		const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+		// Create a curved path for more organic feel
+		const midX = (fromHex.x + toHex.x) / 2 + (Math.random() * 20 - 10);
+		const midY = (fromHex.y + toHex.y) / 2 + (Math.random() * 20 - 10);
+		const pathData = `M${fromHex.x},${fromHex.y} Q${midX},${midY} ${toHex.x},${toHex.y}`;
+
+		arrow.setAttribute("d", pathData);
+		arrow.setAttribute("stroke", "url(#magicGradient)");
+		arrow.setAttribute("stroke-width", 3);
+		arrow.setAttribute("fill", "none");
+		arrow.setAttribute("stroke-dasharray", "5,3");
 		arrow.setAttribute("class", "movement-arrow");
+
+		// Add sparkle effect
+		const sparkles = document.createElementNS("http://www.w3.org/2000/svg", "g");
+		sparkles.setAttribute("class", "sparkle-group");
+
+		// Create multiple sparkles along the path
+		for (let i = 0; i < 8; i++) {
+			const sparkle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+			sparkle.setAttribute("r", 2);
+			sparkle.setAttribute("fill", "#fff");
+			sparkle.setAttribute("class", "sparkle");
+			sparkles.appendChild(sparkle);
+		}
+
 		svg.appendChild(arrow);
+		svg.appendChild(sparkles);
+
+		// Animate the sparkles along the path
+		const pathLength = arrow.getTotalLength();
+		const sparkleElements = sparkles.querySelectorAll(".sparkle");
+
+		sparkleElements.forEach((sparkle, index) => {
+			const point = arrow.getPointAtLength((index / sparkleElements.length) * pathLength);
+			sparkle.setAttribute("cx", point.x);
+			sparkle.setAttribute("cy", point.y);
+		});
 
 		setTimeout(() => {
 			arrow.remove();
-		}, 1000);
+			sparkles.remove();
+		}, 800); // Reduced from 1000ms
 	}
 
 	showBlockedMovement(fromHex, toHex) {
 		const svg = document.querySelector(".grid-overlay");
-		const blockedLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-		blockedLine.setAttribute("stroke", "#ff0000");
-		blockedLine.setAttribute("stroke-width", 2);
-		blockedLine.setAttribute("x1", fromHex.x);
-		blockedLine.setAttribute("y1", fromHex.y);
-		blockedLine.setAttribute("x2", toHex.x);
-		blockedLine.setAttribute("y2", toHex.y);
+
+		// Create jagged lightning-like path
+		const blockedLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+		const segments = 8;
+		let pathData = `M${fromHex.x},${fromHex.y}`;
+
+		for (let i = 1; i <= segments; i++) {
+			const ratio = i / segments;
+			const x = fromHex.x + (toHex.x - fromHex.x) * ratio;
+			const y = fromHex.y + (toHex.y - fromHex.y) * ratio;
+			const offsetX = (Math.random() * 15 - 7.5) * (1 - ratio);
+			const offsetY = (Math.random() * 15 - 7.5) * (1 - ratio);
+			pathData += ` L${x + offsetX},${y + offsetY}`;
+		}
+
+		blockedLine.setAttribute("d", pathData);
+		blockedLine.setAttribute("stroke", "#c13c2e");
+		blockedLine.setAttribute("stroke-width", 3);
+		blockedLine.setAttribute("fill", "none");
+		blockedLine.setAttribute("stroke-dasharray", "5,2");
 		blockedLine.setAttribute("class", "blocked-movement");
+		blockedLine.setAttribute("filter", "url(#fireGlow)");
+
+		// Add impact effect
+		const impact = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+		impact.setAttribute("cx", toHex.x);
+		impact.setAttribute("cy", toHex.y);
+		impact.setAttribute("r", 0);
+		impact.setAttribute("fill", "none");
+		impact.setAttribute("stroke", "#c13c2e");
+		impact.setAttribute("stroke-width", 2);
+		impact.setAttribute("class", "impact-effect");
+
 		svg.appendChild(blockedLine);
+		svg.appendChild(impact);
+
+		// Animate impact
+		impact.animate(
+			[
+				{ r: 0, opacity: 1 },
+				{ r: 15, opacity: 0 },
+			],
+			{
+				duration: 500,
+				easing: "ease-out",
+			}
+		);
 
 		setTimeout(() => {
 			blockedLine.remove();
+			impact.remove();
 		}, 500);
 	}
 

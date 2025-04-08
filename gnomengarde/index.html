@@ -11,7 +11,23 @@
 
 <body>
     <div id="container">
-        <svg class="grid-overlay"></svg>
+        <svg class="grid-overlay">
+            <defs>
+                <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <filter id="fireGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feColorMatrix type="matrix" values="
+                        1 0 0 0 0
+                        0 0.3 0 0 0
+                        0 0 0 0 0
+                        0 0 0 1 0" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+            </defs>
+        </svg>
         <div class="title-overlay">Gnomish Riddle</div>
         <div class="decorative-corner tl"></div>
         <div class="decorative-corner tr"></div>

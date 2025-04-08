@@ -146,9 +146,18 @@ body {
 }
 
 .reset-indicator.inactive::before {
-    content: "✓";
+    content: "✧";
     color: #2ecc71;
     text-shadow: 0 0 5px rgba(46, 204, 113, 0.7);
+    animation: pulse 1s infinite;
+    animation-direction: alternate;
+
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); text-shadow: 0 0 20px rgba(46, 204, 113, 0.8); }
+    100% { transform: scale(1); }
 }
 
 @keyframes spin {
@@ -202,4 +211,40 @@ body {
     right: 10px;
     border-left: none;
     border-top: none;
+}
+
+/* Add to style.css */
+.movement-arrow {
+    filter: url(#glow);
+    animation: magicalTrail 1s forwards;
+}
+
+@keyframes magicalTrail {
+    0% { stroke-width: 4; opacity: 1; }
+    100% { stroke-width: 0; opacity: 0; }
+}
+
+.sparkle {
+    animation: sparkleTwinkle 0.5s infinite alternate;
+}
+
+@keyframes sparkleTwinkle {
+    0% { opacity: 0.3; r: 1; }
+    100% { opacity: 1; r: 3; }
+}
+
+/* Add glow filter */
+#glow {
+    filter: drop-shadow(0 0 2px #d4af37)
+            drop-shadow(0 0 5px #f0e68c)
+            drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+}
+
+/* Add to style.css */
+.drag-line, .sparkle-group, .origin-pulse {
+    transition: opacity 0.3s ease-out;
+}
+
+.movement-arrow, .blocked-movement {
+    transition: opacity 0.5s ease-out, stroke-width 0.5s ease-out;
 }

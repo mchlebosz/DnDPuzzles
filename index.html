@@ -5,15 +5,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DnD Puzzles</title>
+    <style>
+        :root {
+            --primary: #5e2c04;
+            --secondary: #d4a76a;
+            --dark: #1a120b;
+            --light: #f8f1e5;
+            --accent: #8b4513;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 0;
+            background-image: url('https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: rgba(26, 18, 11, 0.85);
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(212, 167, 106, 0.3);
+        }
+
+        h1 {
+            color: var(--secondary);
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .puzzle-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .puzzle-list li {
+            margin: 1.5rem 0;
+        }
+
+        .puzzle-list a {
+            display: block;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: var(--light);
+            text-decoration: none;
+            font-size: 1.3rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .puzzle-list a:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-style: italic;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Welcome to DnD Puzzles</h1>
-    <p>Explore the subdirectories:</p>
-    <ul>
-        <li><a href="./dwarven-gate/">Dwarven Gate</a></li>
-        <li><a href="./gnomengarde/">Gnomengarde</a></li>
-    </ul>
+    <div class="container">
+        <h1>Welcome to DnD Puzzles</h1>
+        <p>Choose your adventure from these mysterious locations:</p>
+
+        <ul class="puzzle-list">
+            <li><a href="./dwarven-gate/">The Dwarven Gate</a></li>
+            <li><a href="./gnomengarde/">Gnomengarde</a></li>
+        </ul>
+
+        <footer>
+            May your rolls be natural and your puzzles solvable!
+        </footer>
+    </div>
 </body>
 
 </html>
