@@ -100,10 +100,10 @@ function checkSolution() {
 	});
 
 	if (isValid) {
-		result.textContent = "\u26CF\uFE0F The gate rumbles... It opens!";
+		result.textContent = "\u26CF\uFE0F Brama dudni... Otwiera sie!";
 		result.style.color = "lightgreen";
 	} else {
-		result.textContent = "\u274C The runes do not align. Try again.";
+		result.textContent = "\u274C Runy nie sa wyrownane. Sprobuj ponownie.";
 		result.style.color = "crimson";
 	}
 }
@@ -134,14 +134,11 @@ if (oldButton) {
 
 // Add to the beginning of script.js
 const fontToggle = document.getElementById("font-toggle");
-const toggleLabel = document.getElementById("toggle-label");
 
 fontToggle.addEventListener("change", function () {
 	if (this.checked) {
 		document.body.classList.add("body-medievalsharp");
-		toggleLabel.textContent = "Medieval Font";
 	} else {
 		document.body.classList.remove("body-medievalsharp");
-		toggleLabel.textContent = "Dwarven Font";
 	}
 });

@@ -159,8 +159,8 @@ button:hover {
 .switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    width: 30px;
+    height: 24px;
 }
 
 .switch input {
@@ -179,15 +179,15 @@ button:hover {
     background-color: #5c3b1e;
     border: 2px solid #deb887;
     transition: .4s;
-    border-radius: 34px;
+    border-radius: 14px;
 }
 
 .slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
+    height: 16px;
+    width: 16px;
+    left: 2px;
     bottom: 2px;
     background-color: #f0e6d2;
     transition: .4s;
@@ -200,7 +200,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(26px);
+    transform: translateX(6px);
 }
 
 /* Add a class for MedievalSharp font */

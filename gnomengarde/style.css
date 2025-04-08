@@ -1,3 +1,10 @@
+ @font-face {
+  font-family: cinzel;
+  src: url(font/CinzelDecorative-Regular.ttf) format('truetype');
+  font-weight: normal;
+}
+
+
 body {
     margin: 0;
     display: flex;
@@ -7,7 +14,7 @@ body {
     background-color: #1a120b;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="%233d2b1f" stroke-width="1"/></svg>');
     background-size: 20px 20px;
-    font-family: 'Cinzel Decorative', cursive;
+    font-family: cinzel, cursive;
     color: #d4af37;
 }
 
@@ -247,4 +254,8 @@ body {
 
 .movement-arrow, .blocked-movement {
     transition: opacity 0.5s ease-out, stroke-width 0.5s ease-out;
+}
+
+#audio-elements {
+    display: none;
 }

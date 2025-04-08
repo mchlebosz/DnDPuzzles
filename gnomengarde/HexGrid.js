@@ -143,10 +143,12 @@ class HexGrid {
 		const indicators = document.querySelectorAll(".reset-indicator");
 		indicators.forEach((indicator, index) => {
 			if (success) {
+				soundManager.play("success");
 				// For success condition (moves=3, hexagons=2), make all indicators green
 				indicator.classList.remove("active");
 				indicator.classList.add("inactive");
 			} else {
+				soundManager.play("error");
 				// Normal behavior - show active indicators based on reset count
 				if (index < this.resetCount) {
 					indicator.classList.add("active");
@@ -187,9 +189,14 @@ class HexGrid {
 
 	isValidMove(startHex, endHex, movingCircleId) {
 		const targetKey = `${endHex.x},${endHex.y}`;
-		if (this.occupiedHexes.has(targetKey)) return false;
 
-		// Get all other circle positions
+		// Check if target is occupied by a non-static circle
+		const isOccupied = Array.from(this.occupiedHexes).some((pos) => {
+			return pos === targetKey;
+		});
+		if (isOccupied) return false;
+
+		// Get all other non-static circle positions
 		const otherCircles = Array.from(this.occupiedHexes)
 			.map((pos) => {
 				const [x, y] = pos.split(",").map(Number);
@@ -202,7 +209,7 @@ class HexGrid {
 			return false;
 		}
 
-		// Check path for other obstacles
+		// Rest of the method remains the same...
 		const dx = endHex.x - startHex.x;
 		const dy = endHex.y - startHex.y;
 		const steps = Math.max(Math.abs(dx / (this.hexRadius * 1.5)), Math.abs(dy / (this.hexRadius * Math.sqrt(3))));
@@ -279,59 +286,49 @@ class HexGrid {
 	}
 
 	resetAllCircles() {
-		this.resetCount = Math.min(this.resetCount + 1, 5); // Cap at 5 resets
-		this.updateResetIndicators(); // Reset indicators to normal state
-		// Store current positions before reset
+		this.resetCount = Math.min(this.resetCount + 1, 5);
+		this.updateResetIndicators();
+
+		// Store current positions of non-static circles before reset
 		const currentCircles = [];
-		document.querySelectorAll(".circle").forEach((circle) => {
+		document.querySelectorAll(".circle:not(.is-static)").forEach((circle) => {
 			const circleId = circle.getAttribute("data-circle-id");
 			const currentX = parseInt(circle.style.left) + this.radius;
 			const currentY = parseInt(circle.style.top) + this.radius;
 			currentCircles.push({ element: circle, id: circleId, x: currentX, y: currentY });
 		});
 
-		// Clear the occupied hexes but keep track of initial positions
 		this.occupiedHexes.clear();
 		this.moveCount = 0;
 
-		// Animate each circle back to its initial position
+		// Rest of the method remains the same...
 		const initialPositions = [
-			{ idPrefix: "circle-", col: 6, row: 20, isStatic: true },
-			{ idPrefix: "circle-", col: 7, row: 25, isStatic: true },
-			{ idPrefix: "circle-", col: 5, row: 25, isStatic: true },
-			{ idPrefix: "circle-", col: 5, row: 35, isStatic: true },
-			{ idPrefix: "circle-", col: 7, row: 35, isStatic: true },
-			{ idPrefix: "circle-", col: 6, row: 50, isStatic: true },
-			{ idPrefix: "circle-", col: 7, row: 125, isStatic: false },
-			{ idPrefix: "circle-", col: 7, row: 135, isStatic: false },
-			{ idPrefix: "circle-", col: 7, row: 155, isStatic: false },
-			{ idPrefix: "circle-", col: 6, row: 120, isStatic: false },
-			{ idPrefix: "circle-", col: 6, row: 130, isStatic: false },
-			{ idPrefix: "circle-", col: 6, row: 150, isStatic: false },
+			// Only include non-static circles here
+			{ col: 7, row: 125, isStatic: false },
+			{ col: 7, row: 135, isStatic: false },
+			{ col: 7, row: 155, isStatic: false },
+			{ col: 6, row: 120, isStatic: false },
+			{ col: 6, row: 130, isStatic: false },
+			{ col: 6, row: 150, isStatic: false },
 		];
 
-		// Animate each existing circle to its initial position
+		// Animate each existing non-static circle to its initial position
 		currentCircles.forEach((circle, index) => {
 			if (index < initialPositions.length) {
 				const targetPos = initialPositions[index];
 				const targetX = this.hexagons[targetPos.col].x;
 				const targetY = this.hexagons[targetPos.row].y;
 
-				// Enable smooth transition
 				circle.element.style.transition = "left 0.8s ease-in-out, top 0.8s ease-in-out";
-				circle.element.style.zIndex = "100"; // Bring to front during animation
+				circle.element.style.zIndex = "100";
 
-				// Move to initial position
 				circle.element.style.left = `${targetX - this.radius}px`;
 				circle.element.style.top = `${targetY - this.radius}px`;
 
-				// Add to occupied hexes
 				this.occupiedHexes.add(`${targetX},${targetY}`);
 
-				circle.element.style.transition = "left 0.8s ease-in-out, top 0.8s ease-in-out";
 				circle.element.classList.add("reset-animating");
 
-				// After animation completes
 				setTimeout(() => {
 					circle.element.style.transition = "none";
 					circle.element.classList.remove("reset-animating");
@@ -339,7 +336,6 @@ class HexGrid {
 			}
 		});
 
-		// Log counters after animation completes (internal only)
 		setTimeout(() => {
 			console.log(`Moves: ${this.moveCount}, Hexagons: ${this.countHexagonFigures()}`);
 		}, 800);

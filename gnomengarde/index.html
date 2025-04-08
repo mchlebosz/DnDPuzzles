@@ -5,11 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gnomish Riddle</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="../favicon.svg" sizes="any" type="image/svg+xml">
 </head>
 
 <body>
+    <div id="audio-elements" style="display: none;">
+        <audio id="success-sound" src="sounds/success.mp3" preload="auto"></audio>
+        <audio id="error-sound" src="sounds/error.mp3" preload="auto"></audio>
+        <audio id="drop-sound" src="sounds/drop.mp3" preload="auto"></audio>
+        <audio id="return-sound" src="sounds/return.mp3" preload="auto"></audio>
+    </div>
     <div id="container">
         <svg class="grid-overlay">
             <defs>
@@ -28,7 +34,7 @@
                 </filter>
             </defs>
         </svg>
-        <div class="title-overlay">Gnomish Riddle</div>
+        <div class="title-overlay">Gnomicki Składek</div>
         <div class="decorative-corner tl"></div>
         <div class="decorative-corner tr"></div>
         <div class="decorative-corner bl"></div>
@@ -43,6 +49,7 @@
         <div class="reset-indicator" data-index="4"></div>
     </div>
 
+    <script src="SoundManager.js"></script>
     <script src="HexGrid.js"></script>
     <script src="DraggableCircle.js"></script>
     <script src="script.js"></script>

@@ -1,4 +1,5 @@
 class DraggableCircle {
+	// In the constructor of DraggableCircle.js
 	constructor(grid, x, y, isStatic = false, id = null) {
 		this.grid = grid;
 		this.radius = grid.radius;
@@ -7,13 +8,14 @@ class DraggableCircle {
 		this.isStatic = isStatic;
 		this.id = id || `circle-${Math.random().toString(36).substr(2, 5)}`;
 		this.element = this.createCircleElement();
-		this.grid.occupiedHexes.add(`${x},${y}`);
+
+		// Only add to occupiedHexes if not static
 		if (!isStatic) {
+			this.grid.occupiedHexes.add(`${x},${y}`);
 			this.setupEventListeners();
 		}
 		this.element.setAttribute("data-circle-id", this.id);
 	}
-
 	createCircleElement() {
 		const circle = document.createElement("div");
 		circle.classList.add("circle");
@@ -237,7 +239,7 @@ class DraggableCircle {
 
 	countAdjacentCircles(hex) {
 		let count = 0;
-		const adjacentDist = this.grid.hexRadius * 1.8; // Slightly more than exact distance to account for rounding
+		const adjacentDist = this.grid.hexRadius * 1.8;
 
 		for (const pos of this.grid.occupiedHexes) {
 			if (pos === `${hex.x},${hex.y}`) continue; // Skip self
@@ -258,6 +260,7 @@ class DraggableCircle {
 		const circle = this.element;
 		circle.style.boxShadow = "0 0 10px 5px rgba(76, 175, 80, 0.5)";
 		circle.style.animation = "validMove 0.5s ease-out";
+		soundManager.play("drop");
 		setTimeout(() => {
 			circle.style.boxShadow = "none";
 			circle.style.animation = "";
@@ -268,6 +271,7 @@ class DraggableCircle {
 		const circle = this.element;
 		circle.style.boxShadow = "0 0 10px 5px rgba(255, 0, 0, 0.5)";
 		circle.style.animation = "invalidMove 0.5s ease-out";
+		soundManager.play("return");
 		setTimeout(() => {
 			circle.style.boxShadow = "none";
 			circle.style.animation = "";
@@ -395,13 +399,13 @@ class DraggableCircle {
 		console.log(`Hexagon count: ${hexagonCount}`);
 
 		// Check if we need to reset (moves = 3 and hexagons = 1)
-		if (this.grid.moveCount === 3 && hexagonCount === 1) {
+		if (this.grid.moveCount === 3 && hexagonCount === 0) {
 			setTimeout(() => {
 				this.grid.resetAllCircles();
 			}, 500);
 		}
 		// Add new condition for changing indicators to green
-		else if (this.grid.moveCount === 3 && hexagonCount === 2) {
+		else if (this.grid.moveCount === 3 && hexagonCount === 1) {
 			this.grid.updateResetIndicators(true); // true means success condition
 		}
 	}
