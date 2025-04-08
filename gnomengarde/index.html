@@ -4,24 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logiczna Zagadkę - Przesuwanie Kółek na Siatce Heksagonalnej</title>
-
+    <title>Gnomish Riddle</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap">
     <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
     <div id="container">
         <svg class="grid-overlay"></svg>
+        <div class="title-overlay">Gnomish Riddle</div>
+        <div class="decorative-corner tl"></div>
+        <div class="decorative-corner tr"></div>
+        <div class="decorative-corner bl"></div>
+        <div class="decorative-corner br"></div>
     </div>
 
-    <!-- Load the class files first -->
+    <div class="reset-indicators">
+        <div class="reset-indicator" data-index="0"></div>
+        <div class="reset-indicator" data-index="1"></div>
+        <div class="reset-indicator" data-index="2"></div>
+        <div class="reset-indicator" data-index="3"></div>
+        <div class="reset-indicator" data-index="4"></div>
+    </div>
+
     <script src="HexGrid.js"></script>
     <script src="DraggableCircle.js"></script>
-    <!-- Then load the main script -->
     <script src="script.js"></script>
-
-
 </body>
 
 </html>

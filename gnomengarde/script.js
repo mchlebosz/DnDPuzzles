@@ -1,6 +1,6 @@
-// Initialize the game
+// Initialize the game with adjusted parameters
 const grid = new HexGrid("container", {
-	radius: 30,
+	radius: 28, // Slightly smaller for better fit
 	hexRadius: 35,
 	columns: 16,
 	rows: 20,
@@ -23,8 +23,8 @@ grid.drawGrid();
 	{ col: 6, row: 130, isStatic: false },
 	{ col: 6, row: 150, isStatic: false },
 ].forEach((circle) => {
-	new DraggableCircle(grid, grid.hexagons[circle.col].x, grid.hexagons[circle.row].y, circle.isStatic);
+	const draggable = new DraggableCircle(grid, grid.hexagons[circle.col].x, grid.hexagons[circle.row].y, circle.isStatic);
+	if (circle.isStatic) {
+		draggable.element.classList.add("is-static");
+	}
 });
-
-// Initialize counters
-grid.updateCounters();

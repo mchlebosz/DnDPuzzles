@@ -9,7 +9,6 @@ class HexGrid {
 		this.hexagons = this.generateHexGrid();
 		this.moveCount = 0;
 		this.resetCount = 0;
-		this.createResetIndicators();
 	}
 
 	generateHexGrid() {
@@ -140,27 +139,22 @@ class HexGrid {
 		return closestHex;
 	}
 
-	createResetIndicators() {
-		this.resetIndicatorContainer = document.createElement("div");
-		this.resetIndicatorContainer.className = "reset-indicators";
-
-		for (let i = 0; i < 5; i++) {
-			const indicator = document.createElement("div");
-			indicator.className = "reset-indicator";
-			indicator.dataset.index = i;
-			this.resetIndicatorContainer.appendChild(indicator);
-		}
-
-		document.body.appendChild(this.resetIndicatorContainer);
-	}
-
-	updateResetIndicators() {
-		const indicators = this.resetIndicatorContainer.querySelectorAll(".reset-indicator");
+	updateResetIndicators(success = false) {
+		const indicators = document.querySelectorAll(".reset-indicator");
 		indicators.forEach((indicator, index) => {
-			if (index < this.resetCount) {
-				indicator.classList.add("active");
-			} else {
+			if (success) {
+				// For success condition (moves=3, hexagons=2), make all indicators green
 				indicator.classList.remove("active");
+				indicator.classList.add("inactive");
+			} else {
+				// Normal behavior - show active indicators based on reset count
+				if (index < this.resetCount) {
+					indicator.classList.add("active");
+					indicator.classList.remove("inactive");
+				} else {
+					indicator.classList.remove("active");
+					indicator.classList.remove("inactive");
+				}
 			}
 		});
 	}
@@ -286,7 +280,7 @@ class HexGrid {
 
 	resetAllCircles() {
 		this.resetCount = Math.min(this.resetCount + 1, 5); // Cap at 5 resets
-		this.updateResetIndicators();
+		this.updateResetIndicators(); // Reset indicators to normal state
 		// Store current positions before reset
 		const currentCircles = [];
 		document.querySelectorAll(".circle").forEach((circle) => {
@@ -345,18 +339,9 @@ class HexGrid {
 			}
 		});
 
-		// Update counters after animation completes
+		// Log counters after animation completes (internal only)
 		setTimeout(() => {
-			this.updateCounters();
+			console.log(`Moves: ${this.moveCount}, Hexagons: ${this.countHexagonFigures()}`);
 		}, 800);
-	}
-
-	updateCounters() {
-		// Find or create counter elements and update them
-		let moveCounter = document.getElementById("move-counter");
-		let hexagonCounter = document.getElementById("hexagon-counter");
-
-		if (moveCounter) moveCounter.textContent = `Moves: ${this.moveCount}`;
-		if (hexagonCounter) hexagonCounter.textContent = `Hexagons: ${this.countHexagonFigures()}`;
 	}
 }

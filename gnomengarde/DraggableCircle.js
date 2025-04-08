@@ -28,6 +28,9 @@ class DraggableCircle {
 		// Add transition for smooth movement
 		circle.style.transition = "left 0.3s ease-out, top 0.3s ease-out";
 		this.grid.container.appendChild(circle);
+		if (this.isStatic) {
+			circle.classList.add("is-static");
+		}
 		return circle;
 	}
 
@@ -132,8 +135,8 @@ class DraggableCircle {
 
 				// Increment move counter
 				this.grid.moveCount++;
-				this.updateMoveCounter();
-				this.updateHexagonCount();
+				this.trackMoveCounter(); // Internal tracking only
+				this.trackHexagonCount(); // Internal tracking only
 			} else {
 				// Invalid drop - animate return to original position
 				this.element.style.transition = "left 0.5s ease-out, top 0.5s ease-out";
@@ -198,22 +201,10 @@ class DraggableCircle {
 			circle.style.animation = "";
 		}, 500);
 	}
-	updateMoveCounter() {
-		let counterElement = document.getElementById("move-counter");
-		if (!counterElement) {
-			counterElement = document.createElement("div");
-			counterElement.id = "move-counter";
-			counterElement.style.position = "absolute";
-			counterElement.style.top = "10px";
-			counterElement.style.right = "10px";
-			counterElement.style.padding = "5px 10px";
-			counterElement.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
-			counterElement.style.borderRadius = "5px";
-			counterElement.style.fontFamily = "Arial, sans-serif";
-			counterElement.style.fontSize = "16px";
-			document.body.appendChild(counterElement);
-		}
-		counterElement.textContent = `Moves: ${this.grid.moveCount}`;
+
+	// Track move counter internally, but don't display
+	trackMoveCounter() {
+		console.log(`Move count: ${this.grid.moveCount}`);
 	}
 
 	logMovement(fromHex, toHex) {
@@ -258,31 +249,19 @@ class DraggableCircle {
 		}, 500);
 	}
 
-	updateHexagonCount() {
+	trackHexagonCount() {
 		const hexagonCount = this.grid.countHexagonFigures();
-		let counterElement = document.getElementById("hexagon-counter");
-
-		if (!counterElement) {
-			counterElement = document.createElement("div");
-			counterElement.id = "hexagon-counter";
-			counterElement.style.position = "absolute";
-			counterElement.style.top = "40px";
-			counterElement.style.right = "10px";
-			counterElement.style.padding = "5px 10px";
-			counterElement.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
-			counterElement.style.borderRadius = "5px";
-			counterElement.style.fontFamily = "Arial, sans-serif";
-			counterElement.style.fontSize = "16px";
-			document.body.appendChild(counterElement);
-		}
-
-		counterElement.textContent = `Hexagons: ${hexagonCount}`;
+		console.log(`Hexagon count: ${hexagonCount}`);
 
 		// Check if we need to reset (moves = 3 and hexagons = 1)
 		if (this.grid.moveCount === 3 && hexagonCount === 1) {
 			setTimeout(() => {
 				this.grid.resetAllCircles();
 			}, 500);
+		}
+		// Add new condition for changing indicators to green
+		else if (this.grid.moveCount === 3 && hexagonCount === 2) {
+			this.grid.updateResetIndicators(true); // true means success condition
 		}
 	}
 }
