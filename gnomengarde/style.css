@@ -37,6 +37,8 @@ body {
     outline-color: #000;
     cursor: pointer;
     touch-action: none;
+    transition: left 0.3s ease-out, top 0.3s ease-out;
+    will-change: transform; /* Optimize for animation */
 }
 
 /* Movement arrow animation */
@@ -49,4 +51,56 @@ body {
 
 @keyframes fadeOut {
     to { opacity: 0; }
+}
+
+/* Animation for valid movement */
+@keyframes validMove {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Animation for invalid movement */
+@keyframes invalidMove {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+/* Add to style.css */
+@keyframes resetPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,255,255,0.7); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+}
+
+.reset-animating {
+    animation: resetPulse 0.8s ease-in-out;
+    z-index: 100 !important;
+}
+
+/* Add to style.css */
+.reset-indicators {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.reset-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ccc;
+    border: 2px solid #999;
+}
+
+.reset-indicator.active {
+    background-color: #e74c3c;
+    border-color: #c0392b;
 }
