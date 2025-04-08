@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Box Animation</title>
+    <link rel="stylesheet" href="src/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+    <div id="audio-elements" style="display: none;">
+        <audio id="ticking-sound" src="sounds/ticking.mp3" preload="auto"></audio>
+        <audio id="click_in-sound" src="sounds/click_in.mp3" preload="auto"></audio>
+        <audio id="click_out-sound" src="sounds/click_out.mp3" preload="auto"></audio>
+    </div>
+    <div id="container"></div>
+    <div id="timer">Time Left: 30 seconds</div>
+
+    <script src="src/SoundManager.js"></script>
+
+    <script src="src/script.js"></script>
+</body>
+
+</html>
