@@ -24,7 +24,10 @@ class BoxAnimation {
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.renderer = new THREE.WebGLRenderer({ antialias: true });
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
-		this.renderer.setClearColor(0x808080); // Gray background
+		this.renderer.SphereGeometry = true;
+		//set bg as transparent
+		this.renderer.setClearColor(0x000000, 0);
+		this.scene.fog = new THREE.Fog(0x2c1e1e, 5, 15);
 		this.renderer.shadowMap.enabled = true;
 		document.getElementById("container").appendChild(this.renderer.domElement);
 
@@ -51,21 +54,18 @@ class BoxAnimation {
 
 	createBox() {
 		const geometry = new THREE.BoxGeometry();
-		const material = new THREE.MeshPhysicalMaterial({
-			color: 0x00ff00,
-			metalness: 0.5,
-			roughness: 0.2,
-			clearcoat: 0.3,
-			clearcoatRoughness: 0.1,
+		const textureLoader = new THREE.TextureLoader();
+
+		const rustedBrassMaterial = new THREE.MeshStandardMaterial({
+			map: textureLoader.load("textures/brass/rust_coarse_01_diff_1k.jpg"),
+			normalMap: textureLoader.load("textures/brass/rust_coarse_01_nor_gl_1k.png"),
+			roughnessMap: textureLoader.load("textures/brass/rust_coarse_01_rough_1k.png"),
+			aoMap: textureLoader.load("textures/brass/rust_coarse_01_ao_1k.jpg"),
+			displacementMap: textureLoader.load("textures/brass/rust_coarse_01_disp_1k.png"),
+			displacementScale: 0, // Keep this small to avoid huge distortions
 		});
-		const materials = [
-			new THREE.MeshPhysicalMaterial(material), // Right face
-			new THREE.MeshPhysicalMaterial(material), // Left face
-			new THREE.MeshPhysicalMaterial(material), // Top face
-			new THREE.MeshPhysicalMaterial(material), // Bottom face
-			new THREE.MeshPhysicalMaterial(material), // Front face
-			new THREE.MeshPhysicalMaterial(material), // Back face
-		];
+
+		const materials = Array(6).fill(rustedBrassMaterial);
 		this.box = new THREE.Mesh(geometry, materials);
 		this.box.castShadow = true;
 		this.box.receiveShadow = true;
@@ -73,10 +73,14 @@ class BoxAnimation {
 		this.scene.add(this.box);
 
 		const planeGeometry = new THREE.PlaneGeometry(10, 10);
-		const planeMaterial = new THREE.MeshPhysicalMaterial({
-			color: 0x808080,
-			metalness: 0.3,
-			roughness: 0.8,
+		const planeMaterial = new THREE.MeshStandardMaterial({
+			map: textureLoader.load("textures/plates/metal_plate_02_diff_1k.png"),
+			normalMap: textureLoader.load("textures/plates/metal_plate_02_nor_gl_1k.png"),
+			roughnessMap: textureLoader.load("textures/plates/metal_plate_02_rough_1k.png"),
+			aoMap: textureLoader.load("textures/plates/metal_plate_02_ao_1k.png"),
+			metalnessMap: textureLoader.load("textures/plates/metal_plate_02_metal_1k.png"),
+			displacementMap: textureLoader.load("textures/plates/metal_plate_02_disp_1k.png"),
+			displacementScale: 0.05,
 		});
 		const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.rotation.x = -Math.PI / 2;
@@ -86,13 +90,16 @@ class BoxAnimation {
 	}
 
 	createCircularButton(color, x, z) {
-		const buttonGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 32);
-		const buttonMaterial = new THREE.MeshPhysicalMaterial({
-			color: color,
-			metalness: 0.5,
-			roughness: 0.2,
-			clearcoat: 0.3,
-			clearcoatRoughness: 0.1,
+		const buttonGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 32);
+		const textureLoader = new THREE.TextureLoader();
+
+		const buttonMaterial = new THREE.MeshStandardMaterial({
+			map: textureLoader.load("textures/blue/blue_metal_plate_diff_1k.jpg"),
+			normalMap: textureLoader.load("textures/blue/blue_metal_plate_nor_gl_1k.jpg"),
+			roughnessMap: textureLoader.load("textures/blue/blue_metal_plate_rough_1k.jpg"),
+			aoMap: textureLoader.load("textures/blue/blue_metal_plate_ao_1k.jpg"),
+			displacementMap: textureLoader.load("textures/blue/blue_metal_plate_disp_1k.jpg"),
+			displacementScale: 0, // Keep this small to avoid huge distortions
 		});
 		const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
 		//.rotation.x = -Math.PI / 2; // Lay flat on the floor
@@ -121,15 +128,20 @@ class BoxAnimation {
 	}
 
 	addLights() {
-		const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Increased intensity to 1.0
+		const ambientLight = new THREE.AmbientLight(0xffccaa, 0.4);
 		this.scene.add(ambientLight);
 
-		const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Increased intensity to 1.5
-		directionalLight.position.set(5, 5);
-		directionalLight.castShadow = true;
-		directionalLight.shadow.mapSize.width = 1024;
-		directionalLight.shadow.mapSize.height = 1024;
-		this.scene.add(directionalLight);
+		const pointLight = new THREE.PointLight(0xffaa55, 1.5, 10);
+		pointLight.position.set(2, 3, 2);
+		pointLight.castShadow = true;
+		this.scene.add(pointLight);
+
+		const spotLight = new THREE.SpotLight(0xffaa88, 0.8);
+		spotLight.position.set(-3, 5, 3);
+		spotLight.angle = Math.PI / 6;
+		spotLight.penumbra = 0.3;
+		spotLight.castShadow = true;
+		this.scene.add(spotLight);
 	}
 
 	startTimer() {
@@ -193,7 +205,7 @@ class BoxAnimation {
 	}
 
 	liftBox() {
-		if (this.box.position.y < 2) {
+		if (this.box.position.y < 1.5) {
 			this.box.position.y += 0.05;
 		} else {
 			this.boxLifted = true;
@@ -259,29 +271,29 @@ class BoxAnimation {
 	}
 
 	addObjectsInsideBox() {
-		const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
-		const sphereMaterial = new THREE.MeshPhysicalMaterial({
-			color: 0xff0000,
-			metalness: 0.5,
-			roughness: 0.2,
-			clearcoat: 0.3,
-			clearcoatRoughness: 0.1,
-		});
-		const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-		sphere.position.set(this.box.position.x, this.box.position.y + 0.2, this.box.position.z);
-		this.scene.add(sphere);
+		const gearTexture = new THREE.TextureLoader().load("textures/gear_diffuse.jpg");
 
-		const cubeGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-		const cubeMaterial = new THREE.MeshPhysicalMaterial({
-			color: 0x0000ff,
-			metalness: 0.5,
-			roughness: 0.2,
-			clearcoat: 0.3,
-			clearcoatRoughness: 0.1,
+		const gearMaterial = new THREE.MeshStandardMaterial({
+			map: gearTexture,
+			metalness: 0.6,
+			roughness: 0.4,
 		});
-		const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-		cube.position.set(this.box.position.x + 0.4, this.box.position.y + 0.2, this.box.position.z);
-		this.scene.add(cube);
+
+		const gear = new THREE.TorusGeometry(0.2, 0.05, 16, 100);
+		const gearMesh = new THREE.Mesh(gear, gearMaterial);
+		gearMesh.rotation.x = Math.PI / 2;
+		gearMesh.position.set(this.box.position.x, this.box.position.y + 0.2, this.box.position.z);
+		this.scene.add(gearMesh);
+
+		const orbMaterial = new THREE.MeshStandardMaterial({
+			color: 0x8833ff,
+			emissive: 0x440088,
+			roughness: 0.3,
+			metalness: 0.2,
+		});
+		const orb = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 32), orbMaterial);
+		orb.position.set(this.box.position.x + 0.4, this.box.position.y + 0.2, this.box.position.z);
+		this.scene.add(orb);
 	}
 
 	addInteractivity() {
